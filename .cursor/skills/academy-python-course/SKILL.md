@@ -11,7 +11,7 @@ commands:
 
 # Python on Vercel
 
-Companion skill for the [Python on Vercel](https://vercel.com/academy/python-on-vercel) course. Ship a FastAPI backend and a Next.js 16 frontend as a single Vercel project, on the hobby plan, under one domain.
+Companion skill for the [Python on Vercel](https://vercel.com/academy/python-on-vercel) course. Ship a FastAPI backend and a Next.js 16 frontend as a single Vercel project under one domain. The Hobby plan supports a personal learning deployment.
 
 ## Commands
 
@@ -26,8 +26,8 @@ Scaffold a Python + Next.js project on Vercel:
 1. Clone the starter repo (`vercel-labs/academy-python-course`)
 2. Install Node deps with `npm install` and Python deps via `pyproject.toml`
 3. Install and authenticate the Vercel CLI (`vercel login`)
-4. Run both apps together with `vercel dev`
-5. Verify `/` renders mock data and `/api/items` returns JSON
+4. Link and inspect the project with `vercel link` and `vercel project inspect --non-interactive`
+5. Run both apps together with `vercel dev`, then verify `/` and `/api/items`
 
 ### `/python-on-vercel submit`
 
@@ -64,13 +64,14 @@ https://vercel.com/academy/python-on-vercel/<lesson>.md   → lesson content
 ### Server-side fetch from Next.js
 
 - Server components need an absolute URL — `fetch("/api/items")` only works in the browser
-- Build the base URL from `process.env.VERCEL_URL` (auto-injected on every deployment)
+- Build the base URL from `process.env.VERCEL_URL` after confirming that the project exposes Vercel system environment variables
 - `VERCEL_URL` is hostname-only — prepend `https://` and fall back to `http://localhost:3000` for local dev
+- Use `{ cache: "no-store" }` so Next.js renders the page at request time instead of fetching the deployment during `next build`
 
 ### Deploy
 
 - `vercel deploy --prod` ships both halves under one domain
-- Hobby plan is sufficient for the entire course
+- Hobby is sufficient for a personal learning deployment; commercial use must follow Vercel's current plan terms
 
 ## Progress detection
 
@@ -86,15 +87,15 @@ https://vercel.com/academy/python-on-vercel/<lesson>.md   → lesson content
 ## Common fixes
 
 - **404 on `/api/items`** — route in `api/index.py` is missing the `/api` prefix. Check for `@app.get("/api/items")`, not `@app.get("/items")`.
-- **Server fetch fails in Next.js** — relative URL from a server component. Build an absolute URL from `process.env.VERCEL_URL` with a localhost fallback.
-- **Deploy fails with `app` not found** — the FastAPI variable must be named `app` at module level. Vercel looks for `app` at supported entrypoints (`app.py`, `index.py`, `server.py`, plus `src/` and `app/` variants). Renaming it to `api`, `server`, or `application` breaks deploy detection.
-- **`fastapi` import error** — Python deps missing from `pyproject.toml`, or wrong Python version. Pin `requires-python = ">=3.12"`.
+- **Server fetch fails in Next.js** — relative URL from a Server Component, missing system environment variables, or a build-time self-fetch. Build an absolute URL from `process.env.VERCEL_URL`, keep the localhost fallback, and pass `{ cache: "no-store" }`.
+- **Deploy fails with `app` not found** — the FastAPI variable must be named `app` at module level. Vercel recognizes `app.py`, `index.py`, `server.py`, `main.py`, `wsgi.py`, and `asgi.py` at the root or under `src/`, `app/`, or `api/`. A custom location requires `tool.vercel.entrypoint` in `pyproject.toml`.
+- **`fastapi` import error** — Python dependencies are missing from `pyproject.toml`, or the selected interpreter does not satisfy `requires-python = ">=3.12"`.
 - **`vercel dev` does not expose `/api/*`** — confirm the command is run from the project root and Python files live in `api/`.
 
 ## Teaching guidelines
 
 - Six lessons total, target a 60-minute end-to-end run
-- Course is hobby-plan compatible — do not introduce Services or other Pro/Enterprise features into the core flow
+- Course is Hobby-compatible for personal learning — do not introduce gated features into the core flow
 - Do not require `vercel.json` — the project structure is the config
 - Keep examples tied to the Hazel Home furniture theme
 - Flask and Django are mentioned only as a one-paragraph aside in the deploy lesson

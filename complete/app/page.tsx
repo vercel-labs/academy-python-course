@@ -10,7 +10,7 @@ async function getItems(): Promise<Item[]> {
   const base = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
     : "http://localhost:3000";
-  const res = await fetch(`${base}/api/items`);
+  const res = await fetch(`${base}/api/items`, { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to fetch items from Hazel Home API");
   return res.json();
 }
