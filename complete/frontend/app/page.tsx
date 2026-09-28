@@ -7,10 +7,11 @@ type Item = {
 };
 
 async function getItems(): Promise<Item[]> {
-  const base = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "http://localhost:3000";
-  const res = await fetch(`${base}/api/items`, { cache: "no-store" });
+  const backendUrl = process.env.BACKEND_URL;
+  if (!backendUrl) {
+    throw new Error("BACKEND_URL is missing. Run vercel dev from the folder containing vercel.json.");
+  }
+  const res = await fetch(new URL("api/items", backendUrl), { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to fetch items from Hazel Home API");
   return res.json();
 }
