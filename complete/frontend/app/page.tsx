@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+
 type Item = {
   id: number;
   name: string;
@@ -7,6 +9,7 @@ type Item = {
 };
 
 async function getItems(): Promise<Item[]> {
+  await connection();
   const backendUrl = process.env.BACKEND_URL;
   if (!backendUrl) {
     throw new Error("BACKEND_URL is missing. Run vercel dev from the folder containing vercel.json.");
